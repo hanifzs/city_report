@@ -1,0 +1,252 @@
+import { useState, useEffect, useCallback } from 'react';
+import { MapView } from './components/Map/MapView';
+import { FloatingSearchBar } from './components/Header/FloatingSearchBar';
+import { FloatingActions } from './components/FAB/FloatingActions';
+import { BottomSheet } from './components/BottomSheet/BottomSheet';
+import { ReportModal } from './components/Modal/ReportModal';
+import { AuthModal } from './components/Modal/AuthModal';
+import { useGeolocation } from './hooks/useGeolocation';
+import { useIncidents } from './hooks/useIncidents';
+import {
+  getCurrentUser,
+  signInWithGoogle,
+  mockSignInWithGoogle,
+  signOutUser,
+} from './lib/supabase';
+import type { UserProfile, IncidentCategory } from './types/incident';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import './styles/floating.css';
+import './styles/bottomsheet.css';
+import './styles/modal.css';
+
+export function App() {
+  // Geolocation
+  const {
+    latitude: userLat,
+    longitude: userLon,
+    isLocating,
+    refreshLocation,
+  } = useGeolocation();
+
+  // Incidents data & filters
+  const {
+    incidents,
+    allIncidents,
+    selectedIncident,
+    setSelectedIncident,
+    selectedCategory,
+    setSelectedCategory,
+    searchQuery,
+    setSearchQuery,
+    addIncident,
+    voteIncident,
+    userVotes,
+  } = useIncidents(userLat, userLon);
+
+  // User Auth State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authReason, setAuthReason] = useState<string>('');
+
+  // Modals & Tile Style
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+  const [pendingDraft, setPendingDraft] = useState<any | null>(null);
+  const [tileStyle, setTileStyle] = useState<'osm' | 'dark' | 'satellite'>('osm');
+
+  // Floating Toast State
+  const [toastMessage, setToastMessage] = useState<{
+    text: string;
+    type: 'success' | 'info';
+  } | null>(null);
+
+  const showToast = useCallback((text: string, type: 'success' | 'info' = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  }, []);
+
+  // Fetch current user on mount
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) setCurrentUser(user);
+    });
+  }, []);
+
+  // Handle Tile cycle
+  const handleCycleTileStyle = () => {
+    setTileStyle((prev) => {
+      if (prev === 'osm') return 'dark';
+      if (prev === 'dark') return 'satellite';
+      return 'osm';
+    });
+    showToast(
+      `Gaya peta: ${
+        tileStyle === 'osm' ? 'Mode Gelap (CARTO)' : tileStyle === 'dark' ? 'Mode Satelit (Esri)' : 'OpenStreetMap Standar'
+      }`,
+      'info'
+    );
+  };
+
+  // Google Login Handlers
+  const handleSignInGoogle = async () => {
+    const res = await signInWithGoogle();
+    if (res.user) {
+      setCurrentUser(res.user);
+      setIsAuthModalOpen(false);
+      showToast(`Selamat datang, ${res.user.full_name}!`);
+
+      // If there was a pending report draft, auto-open report modal
+      if (pendingDraft) {
+        setIsReportModalOpen(true);
+      }
+    }
+  };
+
+  const handleDemoSignIn = () => {
+    const res = mockSignInWithGoogle();
+    setCurrentUser(res.user);
+    setIsAuthModalOpen(false);
+    showToast(`Mode Demo Aktif: Masuk sebagai ${res.user.full_name}`);
+
+    // If there was a pending draft, continue reporting
+    if (pendingDraft) {
+      setIsReportModalOpen(true);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    setCurrentUser(null);
+    setIsAuthModalOpen(false);
+    showToast('Berhasil keluar dari akun.', 'info');
+  };
+
+  // Report Gate Trigger
+  const handleRequireAuth = (draftData: any) => {
+    setPendingDraft(draftData);
+    setIsReportModalOpen(false);
+    setAuthReason(
+      'Untuk memastikan keabsahan laporan jalan & mencegah spam, silakan login dengan akun Google Anda sebelum mengirim.'
+    );
+    setIsAuthModalOpen(true);
+  };
+
+  // Submit Report
+  const handleSubmitReport = async (reportData: {
+    title: string;
+    description: string;
+    category: IncidentCategory;
+    latitude: number;
+    longitude: number;
+    address: string;
+    photo_url?: string;
+  }) => {
+    await addIncident({
+      ...reportData,
+      reporter_id: currentUser?.id,
+      reporter_name: currentUser?.full_name || 'Warga Komunitas',
+      reporter_avatar: currentUser?.avatar_url,
+      status: 'active',
+    });
+
+    setPendingDraft(null);
+    showToast('Laporan Anda berhasil dikirim dan disiarkan ke warga sekitar! 🎉');
+  };
+
+  // Handle Community Vote
+  const handleVote = async (
+    incidentId: string,
+    type: 'still_happening' | 'resolved'
+  ) => {
+    const res = await voteIncident(incidentId, type);
+    showToast(res.message, res.success ? 'success' : 'info');
+  };
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', margin: 0, padding: 0, overflow: 'hidden' }}>
+      {/* 1. Full-screen Interactive Map */}
+      <MapView
+        userLat={userLat}
+        userLon={userLon}
+        incidents={incidents}
+        selectedIncident={selectedIncident}
+        onSelectIncident={(inc) => setSelectedIncident(inc)}
+        tileStyle={tileStyle}
+      />
+
+      {/* 2. Top Floating Search Bar & Filters */}
+      <FloatingSearchBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        currentUser={currentUser}
+        onOpenAuthModal={() => {
+          setAuthReason('');
+          setIsAuthModalOpen(true);
+        }}
+        totalIncidentsCount={allIncidents.length}
+      />
+
+      {/* 3. Floating Action Buttons */}
+      <FloatingActions
+        onRecenter={refreshLocation}
+        isLocating={isLocating}
+        onOpenReportModal={() => setIsReportModalOpen(true)}
+        tileStyle={tileStyle}
+        onCycleTileStyle={handleCycleTileStyle}
+        bottomOffset={selectedIncident ? 96 : 96}
+      />
+
+      {/* 4. Draggable Bottom Sheet */}
+      <BottomSheet
+        incidents={incidents}
+        selectedIncident={selectedIncident}
+        onSelectIncident={setSelectedIncident}
+        onVote={handleVote}
+        userVotes={userVotes}
+        userLat={userLat}
+        userLon={userLon}
+      />
+
+      {/* 5. Report Incident Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        userLat={userLat}
+        userLon={userLon}
+        currentUser={currentUser}
+        onRequireAuth={handleRequireAuth}
+        onSubmitReport={handleSubmitReport}
+        pendingDraft={pendingDraft}
+      />
+
+      {/* 6. Google Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onSignInWithGoogle={handleSignInGoogle}
+        onDemoSignIn={handleDemoSignIn}
+        onSignOut={handleSignOut}
+        reasonText={authReason}
+      />
+
+      {/* 7. Floating Toast Message */}
+      {toastMessage && (
+        <div className="toast-floating-container">
+          <div className="toast-message-pill">
+            {toastMessage.type === 'success' ? (
+              <CheckCircle2 size={17} color="#10b981" />
+            ) : (
+              <AlertCircle size={17} color="#38bdf8" />
+            )}
+            <span>{toastMessage.text}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+export default App;
