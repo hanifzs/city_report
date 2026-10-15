@@ -10,28 +10,14 @@ interface MapViewProps {
   incidents: Incident[];
   selectedIncident: Incident | null;
   onSelectIncident: (incident: Incident) => void;
-  tileStyle?: 'osm' | 'dark' | 'voyager' | 'satellite';
+  tileStyle?: string;
   isPickingLocation?: boolean;
   pickedLocation?: { lat: number; lng: number } | null;
   onPickLocation?: (coords: { lat: number; lng: number }) => void;
 }
 
 const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors';
-
-const TILE_URLS: Record<string, string> = {
-  osm: OSM_TILE_URL,
-  voyager: OSM_TILE_URL,
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-};
-
-const ATTRIBUTIONS: Record<string, string> = {
-  osm: OSM_ATTRIBUTION,
-  voyager: OSM_ATTRIBUTION,
-  dark: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
-  satellite: '&copy; Esri &mdash; Earthstar Geographics',
-};
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 // SVG icons for marker pins
 function getCategorySvgPath(category: string): string {
@@ -59,7 +45,6 @@ export const MapView: React.FC<MapViewProps> = ({
   incidents,
   selectedIncident,
   onSelectIncident,
-  tileStyle,
   isPickingLocation,
   pickedLocation,
   onPickLocation,
@@ -71,7 +56,7 @@ export const MapView: React.FC<MapViewProps> = ({
   const incidentMarkersRef = useRef<Map<string, L.Marker>>(new Map());
   const pickMarkerRef = useRef<L.Marker | null>(null);
 
-  // 1. Initialize Map
+  // 1. Initialize Map with bright standard OpenStreetMap
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
@@ -81,12 +66,8 @@ export const MapView: React.FC<MapViewProps> = ({
       zoomControl: false,
     });
 
-    const currentStyle = tileStyle || 'osm';
-    const tileUrl = TILE_URLS[currentStyle] || OSM_TILE_URL;
-    const attribution = ATTRIBUTIONS[currentStyle] || OSM_ATTRIBUTION;
-
-    const tileLayer = L.tileLayer(tileUrl, {
-      attribution: attribution,
+    const tileLayer = L.tileLayer(OSM_TILE_URL, {
+      attribution: OSM_ATTRIBUTION,
       maxZoom: 19,
     }).addTo(map);
 
@@ -118,23 +99,6 @@ export const MapView: React.FC<MapViewProps> = ({
       mapInstanceRef.current = null;
     };
   }, []);
-
-  // 2. Update Tile Layer on style change
-  useEffect(() => {
-    if (!mapInstanceRef.current || !tileLayerRef.current) return;
-
-    const currentStyle = tileStyle || 'osm';
-    const tileUrl = TILE_URLS[currentStyle] || OSM_TILE_URL;
-    const attribution = ATTRIBUTIONS[currentStyle] || OSM_ATTRIBUTION;
-
-    mapInstanceRef.current.removeLayer(tileLayerRef.current);
-    const newLayer = L.tileLayer(tileUrl, {
-      attribution: attribution,
-      maxZoom: 19,
-    }).addTo(mapInstanceRef.current);
-
-    tileLayerRef.current = newLayer;
-  }, [tileStyle]);
 
   // 3. User GPS Location Marker
   useEffect(() => {

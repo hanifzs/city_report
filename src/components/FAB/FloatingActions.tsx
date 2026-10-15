@@ -1,12 +1,12 @@
 import React from 'react';
-import { Crosshair, Plus, Layers } from 'lucide-react';
+import { Crosshair, Plus } from 'lucide-react';
 
 interface FloatingActionsProps {
   onRecenter: () => void;
   isLocating: boolean;
   onOpenReportModal: () => void;
-  tileStyle: 'osm' | 'dark' | 'voyager' | 'satellite';
-  onCycleTileStyle: () => void;
+  tileStyle?: string;
+  onCycleTileStyle?: () => void;
   bottomOffset?: number;
 }
 
@@ -14,8 +14,6 @@ export const FloatingActions: React.FC<FloatingActionsProps> = ({
   onRecenter,
   isLocating,
   onOpenReportModal,
-  tileStyle,
-  onCycleTileStyle,
   bottomOffset = 110,
 }) => {
   return (
@@ -23,15 +21,6 @@ export const FloatingActions: React.FC<FloatingActionsProps> = ({
       className="floating-actions-container"
       style={{ bottom: `${bottomOffset}px` }}
     >
-      {/* Map Tile Style Switcher */}
-      <button
-        className="floating-btn"
-        onClick={onCycleTileStyle}
-        title={`Ganti Gaya Peta (Saat ini: ${tileStyle})`}
-      >
-        <Layers size={20} color="#cbd5e1" />
-      </button>
-
       {/* Recenter Location Button */}
       <button
         className={`floating-btn location-btn ${isLocating ? 'locating' : ''}`}

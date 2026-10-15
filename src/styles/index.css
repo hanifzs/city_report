@@ -139,7 +139,7 @@ input, textarea, select {
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;
-  background-color: #0B132B !important;
+  background-color: #f1f5f9 !important;
   font-family: var(--font-family) !important;
   z-index: 1 !important;
 }
@@ -149,17 +149,17 @@ input, textarea, select {
 }
 
 .leaflet-control-attribution {
-  font-size: 9px !important;
-  background: rgba(11, 19, 43, 0.85) !important;
-  color: #94A3B8 !important;
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #475569 !important;
   backdrop-filter: blur(6px);
   border-radius: 6px 0 0 0;
   padding: 3px 8px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
 .leaflet-control-attribution a {
-  color: #38BDF8 !important;
+  color: #0284C7 !important;
   text-decoration: none;
 }
 

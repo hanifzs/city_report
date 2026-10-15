@@ -49,10 +49,9 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authReason, setAuthReason] = useState<string>('');
 
-  // Modals & Tile Style
+  // Modals & Report Draft
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [pendingDraft, setPendingDraft] = useState<any | null>(null);
-  const [tileStyle, setTileStyle] = useState<'osm' | 'dark' | 'satellite'>('dark');
 
   // Splash Screen State
   const [showSplash, setShowSplash] = useState<boolean>(true);
@@ -76,20 +75,6 @@ export function App() {
       if (user) setCurrentUser(user);
     });
   }, []);
-
-  // Handle Tile cycle
-  const handleCycleTileStyle = () => {
-    setTileStyle((prev) => {
-      const next = prev === 'dark' ? 'satellite' : prev === 'satellite' ? 'osm' : 'dark';
-      showToast(
-        `Gaya peta: ${
-          next === 'dark' ? 'Mode Gelap (CARTO Dark Matter)' : next === 'satellite' ? 'Mode Satelit (Esri)' : 'OpenStreetMap Standar'
-        }`,
-        'info'
-      );
-      return next;
-    });
-  };
 
   // Google Login Handlers
   const handleSignInGoogle = async () => {
@@ -175,7 +160,6 @@ export function App() {
         incidents={incidents}
         selectedIncident={selectedIncident}
         onSelectIncident={(inc) => setSelectedIncident(inc)}
-        tileStyle={tileStyle}
       />
 
       {/* 2. Top Floating Search Bar & Filters */}
@@ -197,8 +181,6 @@ export function App() {
         onRecenter={refreshLocation}
         isLocating={isLocating}
         onOpenReportModal={() => setIsReportModalOpen(true)}
-        tileStyle={tileStyle}
-        onCycleTileStyle={handleCycleTileStyle}
         bottomOffset={selectedIncident ? 96 : 96}
       />
 
