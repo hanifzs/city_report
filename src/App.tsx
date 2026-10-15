@@ -5,6 +5,7 @@ import { FloatingActions } from './components/FAB/FloatingActions';
 import { BottomSheet } from './components/BottomSheet/BottomSheet';
 import { ReportModal } from './components/Modal/ReportModal';
 import { AuthModal } from './components/Modal/AuthModal';
+import { SplashScreen } from './components/SplashScreen/SplashScreen';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useIncidents } from './hooks/useIncidents';
 import {
@@ -51,7 +52,10 @@ export function App() {
   // Modals & Tile Style
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [pendingDraft, setPendingDraft] = useState<any | null>(null);
-  const [tileStyle, setTileStyle] = useState<'osm' | 'dark' | 'satellite'>('osm');
+  const [tileStyle, setTileStyle] = useState<'osm' | 'dark' | 'satellite'>('dark');
+
+  // Splash Screen State
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   // Floating Toast State
   const [toastMessage, setToastMessage] = useState<{
@@ -76,16 +80,15 @@ export function App() {
   // Handle Tile cycle
   const handleCycleTileStyle = () => {
     setTileStyle((prev) => {
-      if (prev === 'osm') return 'dark';
-      if (prev === 'dark') return 'satellite';
-      return 'osm';
+      const next = prev === 'dark' ? 'satellite' : prev === 'satellite' ? 'osm' : 'dark';
+      showToast(
+        `Gaya peta: ${
+          next === 'dark' ? 'Mode Gelap (CARTO Dark Matter)' : next === 'satellite' ? 'Mode Satelit (Esri)' : 'OpenStreetMap Standar'
+        }`,
+        'info'
+      );
+      return next;
     });
-    showToast(
-      `Gaya peta: ${
-        tileStyle === 'osm' ? 'Mode Gelap (CARTO)' : tileStyle === 'dark' ? 'Mode Satelit (Esri)' : 'OpenStreetMap Standar'
-      }`,
-      'info'
-    );
   };
 
   // Google Login Handlers
@@ -164,7 +167,7 @@ export function App() {
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', margin: 0, padding: 0, overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: '#0B132B' }}>
       {/* 1. Full-screen Interactive Map */}
       <MapView
         userLat={userLat}
@@ -238,13 +241,21 @@ export function App() {
         <div className="toast-floating-container">
           <div className="toast-message-pill">
             {toastMessage.type === 'success' ? (
-              <CheckCircle2 size={17} color="#10b981" />
+              <CheckCircle2 size={17} color="#34d399" />
             ) : (
               <AlertCircle size={17} color="#38bdf8" />
             )}
             <span>{toastMessage.text}</span>
           </div>
         </div>
+      )}
+
+      {/* 8. App Opening Splash Screen */}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => setShowSplash(false)}
+          duration={2200}
+        />
       )}
     </div>
   );

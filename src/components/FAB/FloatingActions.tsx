@@ -29,7 +29,7 @@ export const FloatingActions: React.FC<FloatingActionsProps> = ({
         onClick={onCycleTileStyle}
         title={`Ganti Gaya Peta (Saat ini: ${tileStyle})`}
       >
-        <Layers size={20} color="#94a3b8" />
+        <Layers size={20} color="#cbd5e1" />
       </button>
 
       {/* Recenter Location Button */}
@@ -38,7 +38,7 @@ export const FloatingActions: React.FC<FloatingActionsProps> = ({
         onClick={onRecenter}
         title="Pusatkan ke Lokasi Saya (GPS)"
       >
-        <Crosshair size={22} color={isLocating ? '#3b82f6' : '#f8fafc'} />
+        <Crosshair size={22} color={isLocating ? '#38bdf8' : '#f8fafc'} />
       </button>
 
       {/* Main Report Incident (+) Button */}

@@ -1,0 +1,260 @@
+/* ==============================================================================
+   Splash Screen Overlay & Animations (Transjakarta-Inspired Modern Transport App)
+   ============================================================================== */
+
+.splash-screen-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background-color: var(--bg-dark, #0B132B);
+  background-image: 
+    radial-gradient(circle at 50% 45%, rgba(37, 99, 235, 0.22) 0%, rgba(11, 19, 43, 0.96) 65%, #060B18 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(44px + var(--safe-top, 16px)) 24px calc(36px + var(--safe-bottom, 16px)) 24px;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: auto;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.splash-screen-container.fading-out {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+/* Background Subtle Geo Radar Rings */
+.splash-bg-rings {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.splash-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.08);
+  pointer-events: none;
+}
+
+.splash-radar-ring.ring-1 {
+  width: 220px;
+  height: 220px;
+}
+
+.splash-radar-ring.ring-2 {
+  width: 380px;
+  height: 380px;
+  border-color: rgba(56, 189, 248, 0.05);
+}
+
+.splash-radar-ring.ring-3 {
+  width: 540px;
+  height: 540px;
+  border-color: rgba(56, 189, 248, 0.03);
+}
+
+/* Center Content */
+.splash-center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  flex: 1;
+  z-index: 2;
+  animation: splashEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes splashEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Logo Box & Glow */
+.splash-logo-wrapper {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-logo-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(37, 99, 235, 0.1) 50%, transparent 75%);
+  animation: splashPulseGlow 2.4s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes splashPulseGlow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.splash-logo-badge {
+  width: 82px;
+  height: 82px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.45);
+  box-shadow: 
+    0 16px 36px rgba(0, 0, 0, 0.65),
+    0 0 28px rgba(37, 99, 235, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.splash-logo-badge::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 100%
+  );
+  transform: rotate(45deg);
+  animation: splashBadgeShine 3s infinite ease-in-out;
+}
+
+@keyframes splashBadgeShine {
+  0% { transform: translateY(-100%) rotate(45deg); }
+  50%, 100% { transform: translateY(100%) rotate(45deg); }
+}
+
+/* Brand Text */
+.splash-brand-text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.splash-title {
+  font-family: var(--font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.splash-subtitle {
+  font-family: var(--font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  color: var(--primary-accent, #38BDF8);
+  text-transform: uppercase;
+  margin: 0;
+  opacity: 0.95;
+}
+
+/* Progress Indicator */
+.splash-progress-track {
+  width: 140px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 10px;
+  position: relative;
+}
+
+.splash-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #38BDF8, #2563EB);
+  border-radius: 99px;
+  animation: splashLoadingBar 2.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+}
+
+@keyframes splashLoadingBar {
+  0% { width: 0%; }
+  40% { width: 45%; }
+  75% { width: 85%; }
+  100% { width: 100%; }
+}
+
+/* Footer (Transjakarta Style Unit Tag) */
+.splash-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  animation: splashFooterEntrance 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes splashFooterEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.splash-footer-line {
+  width: 32px;
+  height: 2px;
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 99px;
+}
+
+.splash-footer-text {
+  font-family: var(--font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #64748B;
+  margin: 0;
+}

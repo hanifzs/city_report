@@ -132,7 +132,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
         {/* Header */}
         <div className="modal-header">
           <div className="modal-title-group">
-            <AlertCircle size={20} color="#10b981" />
+            <AlertCircle size={20} color="#38bdf8" />
             <h3 className="modal-title">Laporkan Gangguan Jalan</h3>
           </div>
           <button className="modal-close-btn" onClick={onClose}>
@@ -245,12 +245,12 @@ export const ReportModal: React.FC<ReportModalProps> = ({
             </label>
             <div className="location-status-badge">
               <div className="location-coord-text">
-                <MapPin size={15} color="#3b82f6" />
+                <MapPin size={15} color="#38bdf8" />
                 <span>
                   {userLat.toFixed(5)}, {userLon.toFixed(5)}
                 </span>
               </div>
-              <span style={{ color: '#10b981', fontSize: 11, fontWeight: 700 }}>
+              <span style={{ color: '#34d399', fontSize: 11, fontWeight: 700 }}>
                 ● GPS Akurat
               </span>
             </div>

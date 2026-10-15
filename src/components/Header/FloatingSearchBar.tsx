@@ -36,7 +36,7 @@ export const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({
 
         {/* Input */}
         <div className="search-input-wrapper">
-          <Search size={16} color="#64748b" />
+          <Search size={16} color="#94a3b8" />
           <input
             type="text"
             className="search-input"
@@ -68,7 +68,7 @@ export const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({
                 alt={currentUser.full_name}
                 className="user-avatar-img"
               />
-              <ShieldCheck size={14} color="#10b981" />
+              <ShieldCheck size={14} color="#38bdf8" />
             </>
           ) : (
             <div className="login-pill-badge">

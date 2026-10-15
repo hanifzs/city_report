@@ -52,56 +52,56 @@ export const CATEGORIES: Record<IncidentCategory, CategoryInfo> = {
     id: 'pothole',
     label: 'Jalan Rusak / Berlubang',
     description: 'Aspal terkelupas, lubang dalam, retakan membahayakan',
-    color: '#f97316', // Orange
-    bgColor: 'rgba(249, 115, 22, 0.15)',
+    color: '#FB923C', // Vivid Orange
+    bgColor: 'rgba(251, 146, 60, 0.2)',
     iconName: 'AlertCircle',
   },
   flood: {
     id: 'flood',
     label: 'Banjir & Genangan',
     description: 'Genangan air tinggi, saluran air meluap',
-    color: '#0ea5e9', // Sky Blue
-    bgColor: 'rgba(14, 165, 233, 0.15)',
+    color: '#38BDF8', // Electric Sky Blue
+    bgColor: 'rgba(56, 189, 248, 0.2)',
     iconName: 'Droplets',
   },
   accident: {
     id: 'accident',
     label: 'Kecelakaan Lalu Lintas',
     description: 'Tabrakan kendaraan, korban butuh bantuan',
-    color: '#ef4444', // Red
-    bgColor: 'rgba(239, 68, 68, 0.15)',
+    color: '#F87171', // Vivid Coral Red
+    bgColor: 'rgba(248, 113, 113, 0.2)',
     iconName: 'ShieldAlert',
   },
   traffic: {
     id: 'traffic',
     label: 'Kemacetan Parah',
     description: 'Macet total tak bergerak, kendaraan mogok',
-    color: '#eab308', // Amber
-    bgColor: 'rgba(234, 179, 8, 0.15)',
+    color: '#FBBF24', // Amber Gold
+    bgColor: 'rgba(251, 191, 36, 0.2)',
     iconName: 'Car',
   },
   streetlight: {
     id: 'streetlight',
     label: 'Lampu Jalan Padam',
     description: 'PJU mati, tiang roboh, area gelap rawan',
-    color: '#a855f7', // Purple
-    bgColor: 'rgba(168, 85, 247, 0.15)',
+    color: '#C084FC', // Luminous Purple
+    bgColor: 'rgba(192, 132, 252, 0.2)',
     iconName: 'LightbulbOff',
   },
   tree_fall: {
     id: 'tree_fall',
     label: 'Pohon Tumbang',
     description: 'Pohon patah, dahan menutupi jalan atau kabel',
-    color: '#10b981', // Emerald
-    bgColor: 'rgba(16, 185, 129, 0.15)',
+    color: '#34D399', // Bright Emerald
+    bgColor: 'rgba(52, 211, 153, 0.2)',
     iconName: 'Trees',
   },
   other: {
     id: 'other',
     label: 'Gangguan Lainnya',
     description: 'Material bangunan tercecer, hewan liar, dll.',
-    color: '#64748b', // Slate
-    bgColor: 'rgba(100, 116, 139, 0.15)',
+    color: '#94A3B8', // Slate Light
+    bgColor: 'rgba(148, 163, 184, 0.2)',
     iconName: 'HelpCircle',
   },
 };

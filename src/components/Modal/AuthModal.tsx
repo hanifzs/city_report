@@ -32,7 +32,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       >
         <div className="modal-header">
           <div className="modal-title-group">
-            <ShieldCheck size={20} color="#10b981" />
+            <ShieldCheck size={20} color="#38bdf8" />
             <h3 className="modal-title">
               {currentUser ? 'Profil Akun Komunitas' : 'Verifikasi Akun Pelapor'}
             </h3>
@@ -53,7 +53,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   width: 72,
                   height: 72,
                   borderRadius: '50%',
-                  border: '3px solid #10b981',
+                  border: '3px solid #38bdf8',
+                  boxShadow: '0 0 20px rgba(56, 189, 248, 0.35)',
                 }}
               />
               <div style={{ textAlign: 'center' }}>

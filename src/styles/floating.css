@@ -23,17 +23,17 @@
   gap: 10px;
   padding: 8px 14px;
   border-radius: var(--radius-full);
-  background: rgba(15, 23, 42, 0.88);
+  background: var(--bg-sheet-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-glass);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
   transition: all 0.25s ease;
 }
 
 .floating-search-bar:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 10px 32px rgba(16, 185, 129, 0.25), 0 0 0 1px var(--primary);
+  border-color: var(--primary-accent);
+  box-shadow: 0 10px 32px rgba(37, 99, 235, 0.35), 0 0 0 1px var(--primary-accent);
 }
 
 .search-brand {
@@ -47,16 +47,16 @@
 .brand-dot {
   width: 10px;
   height: 10px;
-  background: var(--primary);
+  background: var(--primary-accent);
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--primary);
+  box-shadow: 0 0 10px var(--primary-accent);
 }
 
 .brand-title {
   font-weight: 800;
   font-size: 14px;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, #60A5FA 0%, #38BDF8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -151,25 +151,26 @@
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(30, 41, 59, 0.88);
   backdrop-filter: blur(14px);
   border: 1px solid var(--border-glass);
-  color: var(--text-muted);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  color: var(--text-secondary);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .filter-chip:hover {
   color: var(--text-main);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(45, 59, 85, 0.95);
+  border-color: rgba(56, 189, 248, 0.4);
   transform: translateY(-1px);
 }
 
 .filter-chip.active {
-  background: #10b981;
+  background: var(--primary);
   color: #ffffff;
-  border-color: #34d399;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  border-color: var(--primary-accent);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.5);
 }
 
 /* ==============================================================================
@@ -194,10 +195,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.9);
+  background: var(--bg-sheet-glass);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border-glass);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
   color: var(--text-main);
   position: relative;
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
@@ -205,36 +206,37 @@
 
 .floating-btn:hover {
   transform: scale(1.08);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
 }
 
 .floating-btn.location-btn.locating {
   animation: pulse-locate 1.2s infinite alternate ease-in-out;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
 }
 
 @keyframes pulse-locate {
   from {
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
   }
   to {
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.8);
   }
 }
 
 .floating-btn.report-btn {
   width: 58px;
   height: 58px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: var(--primary-gradient);
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 28px rgba(37, 99, 235, 0.55), 0 0 20px rgba(14, 165, 233, 0.35);
 }
 
 .floating-btn.report-btn:hover {
   transform: scale(1.12);
-  box-shadow: 0 12px 36px rgba(16, 185, 129, 0.7), 0 0 25px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 12px 36px rgba(37, 99, 235, 0.75), 0 0 26px rgba(14, 165, 233, 0.55);
 }
 
 .fab-badge-text {
