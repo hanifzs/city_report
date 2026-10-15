@@ -18,6 +18,8 @@ import {
   signInWithEmail,
   signUpWithEmail,
   resetPasswordForEmail,
+  isSupabaseConfigured,
+  SUPABASE_CONFIG_ERROR_MESSAGE,
 } from '../../lib/supabase';
 
 interface AuthModalProps {
@@ -62,6 +64,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     resetFormState();
     setMode('login');
     onClose();
+  };
+
+  const handleGoogleLogin = () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    if (!isSupabaseConfigured()) {
+      setErrorMessage(SUPABASE_CONFIG_ERROR_MESSAGE);
+      return;
+    }
+    onSignInWithGoogle();
   };
 
   // 1. Handle Email + Password Sign In
@@ -339,6 +351,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               )}
 
+              {/* Notice when Supabase credentials are missing */}
+              {!isSupabaseConfigured() && (
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    background: 'rgba(245, 158, 11, 0.12)',
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    fontSize: 11.5,
+                    color: '#fde68a',
+                    lineHeight: 1.45,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 8,
+                  }}
+                >
+                  <AlertCircle size={15} color="#fbbf24" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span>
+                    <strong>Pemberitahuan Konfigurasi:</strong> Variabel lingkungan{' '}
+                    <code style={{ color: '#38bdf8' }}>VITE_SUPABASE_URL</code> dan{' '}
+                    <code style={{ color: '#38bdf8' }}>VITE_SUPABASE_ANON_KEY</code> belum terpasang. Harap lengkapi di pengaturan Vercel atau .env.
+                  </span>
+                </div>
+              )}
+
               {/* Alert Feedback Messages */}
               {errorMessage && (
                 <div className="auth-error-alert animate-fade-in">
@@ -448,7 +485,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     className="google-login-button"
-                    onClick={onSignInWithGoogle}
+                    onClick={handleGoogleLogin}
                     disabled={isLoading}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24">
@@ -569,7 +606,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     className="google-login-button"
-                    onClick={onSignInWithGoogle}
+                    onClick={handleGoogleLogin}
                     disabled={isLoading}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24">

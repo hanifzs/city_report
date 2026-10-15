@@ -1,24 +1,55 @@
 import { createClient } from '@supabase/supabase-js';
 import type { UserProfile } from '../types/incident';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// 1. Baca variabel lingkungan dengan fallback string aman
+export const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+export const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-// Detect if user has provided real Supabase keys
+// Validasi format URL untuk mencegah crash createClient
+const isValidUrl = (url: string): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Memeriksa apakah kredensial Supabase telah dikonfigurasi dengan benar
+ */
 export const isSupabaseConfigured = (): boolean => {
   return (
     Boolean(supabaseUrl) &&
     Boolean(supabaseAnonKey) &&
+    isValidUrl(supabaseUrl) &&
     !supabaseUrl.includes('placeholder') &&
     !supabaseAnonKey.includes('placeholder')
   );
 };
 
-// Create real client or dummy client to prevent crash
+export const SUPABASE_CONFIG_ERROR_MESSAGE =
+  'Layanan database & autentikasi belum terhubung. Pastikan variabel lingkungan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel (Project Settings > Environment Variables) atau berkas .env Anda.';
+
+// 2. Inisialisasi Supabase Client dengan konfigurasi aman agar aplikasi tidak crash jika env kosong
 export const supabase = createClient(
   isSupabaseConfigured() ? supabaseUrl : 'https://dummy-app.supabase.co',
-  isSupabaseConfigured() ? supabaseAnonKey : 'dummy-anon-key'
+  isSupabaseConfigured() ? supabaseAnonKey : 'dummy-anon-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
 );
+
+if (!isSupabaseConfigured()) {
+  console.info(
+    'ℹ️ [CityReport] Supabase: VITE_SUPABASE_URL atau VITE_SUPABASE_ANON_KEY belum diisi. Mode aman aktif.'
+  );
+}
 
 /**
  * Sign in using Google OAuth via Supabase
@@ -26,9 +57,7 @@ export const supabase = createClient(
 export async function signInWithGoogle(): Promise<{ error: Error | null }> {
   if (!isSupabaseConfigured()) {
     return {
-      error: new Error(
-        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
-      ),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -56,9 +85,7 @@ export async function signInWithEmail(
 ): Promise<{ error: Error | null; user?: UserProfile }> {
   if (!isSupabaseConfigured()) {
     return {
-      error: new Error(
-        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
-      ),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -98,9 +125,7 @@ export async function signUpWithEmail(
 ): Promise<{ error: Error | null; user?: UserProfile; message?: string }> {
   if (!isSupabaseConfigured()) {
     return {
-      error: new Error(
-        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
-      ),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -148,9 +173,7 @@ export async function resetPasswordForEmail(
 ): Promise<{ error: Error | null; message?: string }> {
   if (!isSupabaseConfigured()) {
     return {
-      error: new Error(
-        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
-      ),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
