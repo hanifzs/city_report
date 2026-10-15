@@ -13,6 +13,7 @@ import {
   isSupabaseConfigured,
   getCurrentUser,
   signInWithGoogle,
+  signInAsGuest,
   signOutUser,
 } from './lib/supabase';
 import type { UserProfile, IncidentCategory } from './types/incident';
@@ -115,15 +116,24 @@ export function App() {
     }
   };
 
-  // Email / Password Login Success Handler
+  // Email / Password / Guest Login Success Handler
   const handleLoginSuccess = (user: UserProfile) => {
     setCurrentUser(user);
     setIsAuthModalOpen(false);
-    showToast(`Selamat datang, ${user.full_name}!`);
+    if (user.is_guest) {
+      showToast(`Mode Pengujian Aktif: Masuk sebagai ${user.full_name}`);
+    } else {
+      showToast(`Selamat datang, ${user.full_name}!`);
+    }
 
     if (pendingDraft) {
       setIsReportModalOpen(true);
     }
+  };
+
+  const handleDemoSignIn = () => {
+    const guest = signInAsGuest();
+    handleLoginSuccess(guest);
   };
 
   const handleSignOut = async () => {
@@ -230,12 +240,13 @@ export function App() {
         pendingDraft={pendingDraft}
       />
 
-      {/* 6. Authentication Modal (Email/Password & Google SSO) */}
+      {/* 6. Authentication Modal (Email/Password, Google SSO & Guest Mode) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         currentUser={currentUser}
         onSignInWithGoogle={handleSignInGoogle}
+        onDemoSignIn={handleDemoSignIn}
         onSignOut={handleSignOut}
         onLoginSuccess={handleLoginSuccess}
         reasonText={authReason}

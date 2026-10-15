@@ -76,6 +76,28 @@ export async function signInWithGoogle(): Promise<{ error: Error | null }> {
   }
 }
 
+export const GUEST_STORAGE_KEY = 'cityreport_guest_user';
+
+/**
+ * Sign in as a Guest / Test User
+ * Memungkinkan pengujian instan tanpa konfigurasi backend atau Google OAuth
+ */
+export function signInAsGuest(customName?: string): UserProfile {
+  const guestUser: UserProfile = {
+    id: 'guest-' + Math.floor(1000 + Math.random() * 9000),
+    email: 'tamu.komunitas@cityreport.id',
+    full_name: customName || 'Pengguna Pengujian (Guest)',
+    avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=GuestUser',
+    is_guest: true,
+  };
+  try {
+    localStorage.setItem(GUEST_STORAGE_KEY, JSON.stringify(guestUser));
+  } catch (e) {
+    console.warn('Gagal menyimpan sesi tamu ke localStorage:', e);
+  }
+  return guestUser;
+}
+
 /**
  * Sign in with Email and Password via Supabase
  */
@@ -85,7 +107,9 @@ export async function signInWithEmail(
 ): Promise<{ error: Error | null; user?: UserProfile }> {
   if (!isSupabaseConfigured()) {
     return {
-      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
+      error: new Error(
+        'Layanan database belum terhubung. Silakan gunakan tombol "Masuk Mode Pengujian / Guest" di bawah untuk mencoba aplikasi secara langsung.'
+      ),
     };
   }
 
@@ -94,7 +118,15 @@ export async function signInWithEmail(
       email,
       password,
     });
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes('Invalid login credentials')) {
+        throw new Error('Email atau password tidak sesuai. Silakan periksa kembali.');
+      }
+      if (error.message.includes('Email not confirmed')) {
+        throw new Error('Email Anda belum dikonfirmasi. Silakan buka tautan verifikasi di email Anda.');
+      }
+      throw error;
+    }
 
     if (data.user) {
       const user: UserProfile = {
@@ -125,7 +157,9 @@ export async function signUpWithEmail(
 ): Promise<{ error: Error | null; user?: UserProfile; message?: string }> {
   if (!isSupabaseConfigured()) {
     return {
-      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
+      error: new Error(
+        'Layanan database belum terhubung. Silakan gunakan tombol "Masuk Mode Pengujian / Guest" di bawah untuk mencoba aplikasi secara langsung.'
+      ),
     };
   }
 
@@ -139,7 +173,15 @@ export async function signUpWithEmail(
         },
       },
     });
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes('User already registered')) {
+        throw new Error('Alamat email ini sudah terdaftar. Silakan login atau gunakan reset password.');
+      }
+      if (error.message.includes('Password should be at least')) {
+        throw new Error('Password minimal harus terdiri dari 6 karakter.');
+      }
+      throw error;
+    }
 
     if (data.user) {
       const user: UserProfile = {
@@ -153,10 +195,14 @@ export async function signUpWithEmail(
         avatar_url: data.user.user_metadata?.avatar_url,
         is_guest: false,
       };
+
+      const needsConfirmation = !data.session;
       return {
         error: null,
-        user,
-        message: 'Akun berhasil dibuat! Silakan cek email Anda jika verifikasi diaktifkan.',
+        user: needsConfirmation ? undefined : user,
+        message: needsConfirmation
+          ? 'Pendaftaran berhasil! Tautan konfirmasi telah dikirim ke email Anda. Silakan verifikasi sebelum login.'
+          : 'Pendaftaran berhasil! Akun Anda aktif dan siap digunakan.',
       };
     }
     return { error: new Error('Pendaftaran gagal diproses.') };
@@ -192,7 +238,7 @@ export async function resetPasswordForEmail(
 }
 
 /**
- * Get current authenticated user from Supabase session
+ * Get current authenticated user from Supabase session or Guest session
  */
 export async function getCurrentUser(): Promise<UserProfile | null> {
   if (isSupabaseConfigured()) {
@@ -216,11 +262,22 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       console.warn('Error fetching Supabase session:', e);
     }
   }
+
+  // Cek sesi Tamu / Guest dari localStorage
+  try {
+    const savedGuest = localStorage.getItem(GUEST_STORAGE_KEY);
+    if (savedGuest) {
+      return JSON.parse(savedGuest) as UserProfile;
+    }
+  } catch {
+    localStorage.removeItem(GUEST_STORAGE_KEY);
+  }
+
   return null;
 }
 
 /**
- * Sign out user via Supabase
+ * Sign out user via Supabase and clear guest session
  */
 export async function signOutUser(): Promise<void> {
   if (isSupabaseConfigured()) {
@@ -230,6 +287,9 @@ export async function signOutUser(): Promise<void> {
       console.error('Error signing out from Supabase:', e);
     }
   }
+  try {
+    localStorage.removeItem(GUEST_STORAGE_KEY);
+  } catch {}
 }
 
 /**
