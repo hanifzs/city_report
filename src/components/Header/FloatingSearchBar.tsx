@@ -59,15 +59,28 @@ export const FloatingSearchBar: React.FC<FloatingSearchBarProps> = ({
         <button
           className="user-auth-btn"
           onClick={onOpenAuthModal}
-          title={currentUser ? `Akun: ${currentUser.full_name}` : 'Login dengan Google'}
+          title={
+            currentUser
+              ? `Akun: ${currentUser.full_name} (Klik untuk Profil & Keluar)`
+              : 'Masuk / Login ke Akun'
+          }
         >
           {currentUser ? (
             <>
-              <img
-                src={currentUser.avatar_url || 'https://api.dicebear.com/7.x/bottts/svg?seed=user'}
-                alt={currentUser.full_name}
-                className="user-avatar-img"
-              />
+              {currentUser.avatar_url ? (
+                <img
+                  src={currentUser.avatar_url}
+                  alt={currentUser.full_name}
+                  className="user-avatar-img"
+                />
+              ) : (
+                <div className="user-avatar-initial">
+                  {currentUser.full_name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className="user-nav-name">
+                {currentUser.full_name.split(' ')[0]}
+              </span>
               <ShieldCheck size={14} color="#38bdf8" />
             </>
           ) : (

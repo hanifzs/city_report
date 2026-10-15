@@ -9,9 +9,10 @@ import { SplashScreen } from './components/SplashScreen/SplashScreen';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useIncidents } from './hooks/useIncidents';
 import {
+  supabase,
+  isSupabaseConfigured,
   getCurrentUser,
   signInWithGoogle,
-  mockSignInWithGoogle,
   signOutUser,
 } from './lib/supabase';
 import type { UserProfile, IncidentCategory } from './types/incident';
@@ -69,35 +70,57 @@ export function App() {
     }, 3500);
   }, []);
 
-  // Fetch current user on mount
+  // Fetch current user on mount & listen for Supabase auth state changes
   useEffect(() => {
     getCurrentUser().then((user) => {
       if (user) setCurrentUser(user);
     });
-  }, []);
 
-  // Google Login Handlers
+    if (isSupabaseConfigured()) {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          const profile: UserProfile = {
+            id: session.user.id,
+            email: session.user.email,
+            full_name:
+              session.user.user_metadata?.full_name ||
+              session.user.email?.split('@')[0] ||
+              'Pengguna',
+            avatar_url: session.user.user_metadata?.avatar_url,
+            is_guest: false,
+          };
+          setCurrentUser(profile);
+
+          if (pendingDraft) {
+            setIsReportModalOpen(true);
+          }
+        } else {
+          setCurrentUser(null);
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [pendingDraft]);
+
+  // Google OAuth Login Handler
   const handleSignInGoogle = async () => {
     const res = await signInWithGoogle();
-    if (res.user) {
-      setCurrentUser(res.user);
-      setIsAuthModalOpen(false);
-      showToast(`Selamat datang, ${res.user.full_name}!`);
-
-      // If there was a pending report draft, auto-open report modal
-      if (pendingDraft) {
-        setIsReportModalOpen(true);
-      }
+    if (res.error) {
+      showToast(res.error.message, 'info');
     }
   };
 
-  const handleDemoSignIn = () => {
-    const res = mockSignInWithGoogle();
-    setCurrentUser(res.user);
+  // Email / Password Login Success Handler
+  const handleLoginSuccess = (user: UserProfile) => {
+    setCurrentUser(user);
     setIsAuthModalOpen(false);
-    showToast(`Mode Demo Aktif: Masuk sebagai ${res.user.full_name}`);
+    showToast(`Selamat datang, ${user.full_name}!`);
 
-    // If there was a pending draft, continue reporting
     if (pendingDraft) {
       setIsReportModalOpen(true);
     }
@@ -115,7 +138,7 @@ export function App() {
     setPendingDraft(draftData);
     setIsReportModalOpen(false);
     setAuthReason(
-      'Untuk memastikan keabsahan laporan jalan & mencegah spam, silakan login dengan akun Google Anda sebelum mengirim.'
+      'Untuk memastikan keabsahan laporan jalan & mencegah spam, silakan login ke akun Anda sebelum mengirim.'
     );
     setIsAuthModalOpen(true);
   };
@@ -207,14 +230,14 @@ export function App() {
         pendingDraft={pendingDraft}
       />
 
-      {/* 6. Google Auth Modal */}
+      {/* 6. Authentication Modal (Email/Password & Google SSO) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         currentUser={currentUser}
         onSignInWithGoogle={handleSignInGoogle}
-        onDemoSignIn={handleDemoSignIn}
         onSignOut={handleSignOut}
+        onLoginSuccess={handleLoginSuccess}
         reasonText={authReason}
       />
 

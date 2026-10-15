@@ -115,7 +115,31 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--primary-accent, #38bdf8);
+}
+
+.user-avatar-initial {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563EB 0%, #38BDF8 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.user-nav-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .login-pill-badge {

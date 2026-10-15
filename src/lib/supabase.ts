@@ -20,61 +20,171 @@ export const supabase = createClient(
   isSupabaseConfigured() ? supabaseAnonKey : 'dummy-anon-key'
 );
 
-// Local simulated user storage key for seamless offline/preview mode
-const DEMO_USER_KEY = 'cityreport_demo_user';
-
 /**
- * Sign in using Google OAuth via Supabase, or provide an instant demo login fallback
+ * Sign in using Google OAuth via Supabase
  */
-export async function signInWithGoogle(): Promise<{ error: Error | null; user?: UserProfile }> {
-  if (isSupabaseConfigured()) {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-      if (error) throw error;
-      return { error: null };
-    } catch (err: any) {
-      console.warn('Supabase Google OAuth failed, switching to fallback demo mode:', err);
-      // Fallback
-      return mockSignInWithGoogle();
-    }
-  } else {
-    // Frictionless fallback for local dev / testing
-    return mockSignInWithGoogle();
+export async function signInWithGoogle(): Promise<{ error: Error | null }> {
+  if (!isSupabaseConfigured()) {
+    return {
+      error: new Error(
+        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
+      ),
+    };
+  }
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+    if (error) throw error;
+    return { error: null };
+  } catch (err: any) {
+    console.error('Supabase Google OAuth error:', err);
+    return { error: err };
   }
 }
 
 /**
- * Mock Google Sign-In for immediate testing
+ * Sign in with Email and Password via Supabase
  */
-export function mockSignInWithGoogle(): { error: null; user: UserProfile } {
-  const mockUser: UserProfile = {
-    id: 'user-demo-' + Math.floor(Math.random() * 10000),
-    email: 'bambang.warga@gmail.com',
-    full_name: 'Bambang Pamungkas (Google)',
-    avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-    is_guest: false,
-  };
-  localStorage.setItem(DEMO_USER_KEY, JSON.stringify(mockUser));
-  return { error: null, user: mockUser };
+export async function signInWithEmail(
+  email: string,
+  password: string
+): Promise<{ error: Error | null; user?: UserProfile }> {
+  if (!isSupabaseConfigured()) {
+    return {
+      error: new Error(
+        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
+      ),
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+
+    if (data.user) {
+      const user: UserProfile = {
+        id: data.user.id,
+        email: data.user.email,
+        full_name:
+          data.user.user_metadata?.full_name ||
+          data.user.email?.split('@')[0] ||
+          'Pengguna',
+        avatar_url: data.user.user_metadata?.avatar_url,
+        is_guest: false,
+      };
+      return { error: null, user };
+    }
+    return { error: new Error('User data tidak ditemukan.') };
+  } catch (err: any) {
+    return { error: err };
+  }
 }
 
 /**
- * Get current authenticated user
+ * Sign up with Email, Password, and Full Name via Supabase
+ */
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  fullName: string
+): Promise<{ error: Error | null; user?: UserProfile; message?: string }> {
+  if (!isSupabaseConfigured()) {
+    return {
+      error: new Error(
+        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
+      ),
+    };
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+    if (error) throw error;
+
+    if (data.user) {
+      const user: UserProfile = {
+        id: data.user.id,
+        email: data.user.email,
+        full_name:
+          data.user.user_metadata?.full_name ||
+          fullName ||
+          data.user.email?.split('@')[0] ||
+          'Pengguna',
+        avatar_url: data.user.user_metadata?.avatar_url,
+        is_guest: false,
+      };
+      return {
+        error: null,
+        user,
+        message: 'Akun berhasil dibuat! Silakan cek email Anda jika verifikasi diaktifkan.',
+      };
+    }
+    return { error: new Error('Pendaftaran gagal diproses.') };
+  } catch (err: any) {
+    return { error: err };
+  }
+}
+
+/**
+ * Send password reset email via Supabase
+ */
+export async function resetPasswordForEmail(
+  email: string
+): Promise<{ error: Error | null; message?: string }> {
+  if (!isSupabaseConfigured()) {
+    return {
+      error: new Error(
+        'Supabase belum terkonfigurasi. Pastikan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY telah diisi di pengaturan Vercel / file .env.'
+      ),
+    };
+  }
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+    if (error) throw error;
+    return {
+      error: null,
+      message: 'Instruksi reset password telah dikirim ke email Anda. Silakan periksa inbox/spam.',
+    };
+  } catch (err: any) {
+    return { error: err };
+  }
+}
+
+/**
+ * Get current authenticated user from Supabase session
  */
 export async function getCurrentUser(): Promise<UserProfile | null> {
   if (isSupabaseConfigured()) {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session?.user) {
         return {
           id: session.user.id,
           email: session.user.email,
-          full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Pengguna',
+          full_name:
+            session.user.user_metadata?.full_name ||
+            session.user.email?.split('@')[0] ||
+            'Pengguna',
           avatar_url: session.user.user_metadata?.avatar_url,
           is_guest: false,
         };
@@ -83,31 +193,20 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       console.warn('Error fetching Supabase session:', e);
     }
   }
-
-  // Check demo user in localStorage
-  const saved = localStorage.getItem(DEMO_USER_KEY);
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch {
-      localStorage.removeItem(DEMO_USER_KEY);
-    }
-  }
   return null;
 }
 
 /**
- * Sign out user
+ * Sign out user via Supabase
  */
 export async function signOutUser(): Promise<void> {
   if (isSupabaseConfigured()) {
     try {
       await supabase.auth.signOut();
     } catch (e) {
-      console.error(e);
+      console.error('Error signing out from Supabase:', e);
     }
   }
-  localStorage.removeItem(DEMO_USER_KEY);
 }
 
 /**
